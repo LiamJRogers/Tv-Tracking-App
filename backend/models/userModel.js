@@ -10,7 +10,9 @@ async function createUsersTable() {
       password VARCHAR(255) NOT NULL,
       created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       profile_pic_url TEXT,
-      is_active BOOLEAN DEFAULT TRUE
+      is_active BOOLEAN DEFAULT TRUE,
+      is_2fa_enabled BOOLEAN DEFAULT FALSE,
+      two_fa_secret VARCHAR(255)
     );
   `);
 }

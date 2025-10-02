@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
-      const data = await res.json();
+      const data = await response.json();
       if (response.ok && data.accessToken) {
         await saveTokens(data.accessToken, refreshToken);
         setAccessToken(data.accessToken);

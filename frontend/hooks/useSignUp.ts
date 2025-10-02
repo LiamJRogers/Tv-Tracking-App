@@ -56,7 +56,7 @@ export function useSignUp() {
             loginData.refreshToken,
             loginData.user
           );
-          router.replace("/home");
+          router.replace("/enable-2fa");
           return true;
         } else {
           setErrors({

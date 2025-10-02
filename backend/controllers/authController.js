@@ -194,3 +194,19 @@ exports.logout = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.enable2FA = async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  try {
+    await pool.query("UPDATE users SET is_2fa_enabled = TRUE WHERE id = $1", [
+      userId,
+    ]);
+    res.json({ message: "2FA enabled" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};

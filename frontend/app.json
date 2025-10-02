@@ -11,6 +11,9 @@
     "ios": {
       "supportsTablet": true
     },
+    "extra": {
+      "API_URL": "http://localhost:3001/api"
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -38,7 +41,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

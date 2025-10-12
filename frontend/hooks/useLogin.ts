@@ -35,6 +35,13 @@ export function useLogin() {
       });
       const data = await response.json();
       if (response.ok) {
+        if (data.requires2FA) {
+          router.replace({
+            pathname: "/verify-2fa",
+            params: { userId: data.user.id },
+          });
+          return true;
+        }
         await authLogin(data.accessToken, data.refreshToken, data.user);
         router.replace("/home");
         return true;

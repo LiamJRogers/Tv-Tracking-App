@@ -2,21 +2,32 @@ const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+const {
+  generateRefreshToken,
+  generate2FACode,
+  getRefreshTokenExpiry,
+  generateAccessToken,
+} = require("../utils/authUtils");
+const { send2FACodeEmail } = require("../utils/email");
 
-function generateRefreshToken() {
-  return crypto.randomBytes(64).toString("hex");
+async function findUserByEmail(email) {
+  const result = await pool.query(
+    "SELECT id, username, email, password, is_2fa_enabled FROM users WHERE email = $1",
+    [email]
+  );
+  return result.rows[0];
 }
 
-function getRefreshTokenExpiry() {
-  const expires = new Date();
-  expires.setDate(expires.getDate() + 30);
-  return expires;
+async function findUserById(id) {
+  const result = await pool.query(
+    "SELECT id, username, email, two_fa_secret FROM users WHERE id = $1",
+    [id]
+  );
+  return result.rows[0];
 }
 
 exports.signup = async (req, res) => {
   let { username, email, password, name } = req.body;
-
   username = validator.trim(validator.escape(username || ""));
   email = validator.normalizeEmail(email || "");
   name = name ? validator.trim(validator.escape(name)) : null;
@@ -24,7 +35,6 @@ exports.signup = async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).json({ error: "Missing required fields" });
   }
-
   if (username.length < 3 || username.length > 20) {
     return res
       .status(400)
@@ -35,13 +45,10 @@ exports.signup = async (req, res) => {
       error: "Username can only contain letters, numbers, and underscores",
     });
   }
-
   if (!validator.isEmail(email)) {
     return res.status(400).json({ error: "Invalid email format" });
   }
-
   const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-
   if (!validator.matches(password, passwordPolicy)) {
     return res.status(400).json({
       error:
@@ -86,36 +93,38 @@ exports.checkUsername = async (req, res) => {
 
 exports.login = async (req, res) => {
   let { email, password } = req.body;
-
   email = validator.normalizeEmail(email || "");
-
   if (!email || !password) {
     return res.status(400).json({ error: "Missing required fields" });
   }
-
   if (!validator.isEmail(email)) {
     return res.status(400).json({ error: "Invalid email format" });
   }
 
   try {
-    const userResult = await pool.query(
-      "SELECT id, username, email, password FROM users WHERE email = $1",
-      [email]
-    );
-    if (userResult.rows.length === 0) {
+    const user = await findUserByEmail(email);
+    if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-    const user = userResult.rows[0];
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const accessToken = jwt.sign(
-      { id: user.id, username: user.username, email: user.email },
-      process.env.JWT_SECRET || "dev_secret",
-      { expiresIn: "15m" }
-    );
+    if (user.is_2fa_enabled) {
+      const code = generate2FACode();
+      await pool.query("UPDATE users SET two_fa_secret = $1 WHERE id = $2", [
+        code,
+        user.id,
+      ]);
+      await send2FACodeEmail(user.email, code);
+      return res.json({
+        user: { id: user.id, username: user.username, email: user.email },
+        requires2FA: true,
+      });
+    }
+
+    const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken();
     const expiresAt = getRefreshTokenExpiry();
 
@@ -159,19 +168,11 @@ exports.refreshToken = async (req, res) => {
       ]);
       return res.status(401).json({ error: "Refresh token expired" });
     }
-    const userResult = await pool.query(
-      "SELECT id, username, email FROM users WHERE id = $1",
-      [user_id]
-    );
-    if (userResult.rows.length === 0) {
+    const user = await findUserById(user_id);
+    if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
-    const user = userResult.rows[0];
-    const accessToken = jwt.sign(
-      { id: user.id, username: user.username, email: user.email },
-      process.env.JWT_SECRET || "dev_secret",
-      { expiresIn: "15m" }
-    );
+    const accessToken = generateAccessToken(user);
     res.json({ accessToken });
   } catch (err) {
     console.error(err);
@@ -205,6 +206,70 @@ exports.enable2FA = async (req, res) => {
       userId,
     ]);
     res.json({ message: "2FA enabled" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.verify2FA = async (req, res) => {
+  const { userId, code } = req.body;
+  if (!userId || !code) {
+    return res.status(400).json({ error: "Missing userId or code" });
+  }
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    if (user.two_fa_secret !== code) {
+      return res.status(401).json({ error: "Invalid code" });
+    }
+    await pool.query("UPDATE users SET two_fa_secret = NULL WHERE id = $1", [
+      userId,
+    ]);
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken();
+    const expiresAt = getRefreshTokenExpiry();
+    await pool.query(
+      "INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES ($1, $2, $3)",
+      [user.id, refreshToken, expiresAt]
+    );
+    res.json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+      accessToken,
+      refreshToken,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.resend2FA = async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({ error: "Missing userId" });
+  }
+  try {
+    const user = await pool.query(
+      "SELECT email, username FROM users WHERE id = $1",
+      [userId]
+    );
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const { email } = user.rows[0];
+    const code = generate2FACode();
+    await pool.query("UPDATE users SET two_fa_secret = $1 WHERE id = $2", [
+      code,
+      userId,
+    ]);
+    await send2FACodeEmail(email, code, true);
+    res.json({ message: "2FA code resent" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

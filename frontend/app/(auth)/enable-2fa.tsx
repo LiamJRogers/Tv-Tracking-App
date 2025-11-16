@@ -7,11 +7,11 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "../hooks/AuthContext";
-import { API_URL } from "../utils/getApiUtils";
+import { useAuth } from "../../hooks/AuthContext";
+import { API_URL } from "../../utils/getApiUtils";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { styles } from "../styles/enable-2fa.styles";
-import { FormError } from "../components/FormError";
+import { styles } from "../../styles/enable-2fa.styles";
+import { FormError } from "../../components/FormError";
 
 export default function Enable2FAScreen() {
   const router = useRouter();

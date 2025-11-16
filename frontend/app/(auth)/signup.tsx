@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useSignUp } from "../hooks/useSignUp";
-import { useInputFields } from "../hooks/useInputFields";
-import { checkUsernameAvailable } from "../utils/validateAuth";
-import { SocialButtons } from "../components/SocialButtons";
-import { FormError } from "../components/FormError";
-import { DividerWithText } from "../components/DividerWithText";
-import { styles } from "../styles/signup.styles";
+import { useSignUp } from "../../hooks/useSignUp";
+import { useInputFields } from "../../hooks/useInputFields";
+import { checkUsernameAvailable } from "../../utils/validateAuth";
+import { SocialButtons } from "../../components/SocialButtons";
+import { FormError } from "../../components/FormError";
+import { DividerWithText } from "../../components/DividerWithText";
+import { styles } from "../../styles/signup.styles";
 
 export default function SignUpScreen() {
   const router = useRouter();

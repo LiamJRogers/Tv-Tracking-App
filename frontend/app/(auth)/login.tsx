@@ -7,11 +7,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { SocialButtons } from "../components/SocialButtons";
-import { FormError } from "../components/FormError";
-import { DividerWithText } from "../components/DividerWithText";
-import { useLogin } from "../hooks/useLogin";
-import { styles } from "../styles/login.styles";
+import { SocialButtons } from "../../components/SocialButtons";
+import { FormError } from "../../components/FormError";
+import { DividerWithText } from "../../components/DividerWithText";
+import { useLogin } from "../../hooks/useLogin";
+import { styles } from "../../styles/login.styles";
 
 export default function LoginScreen() {
   const router = useRouter();

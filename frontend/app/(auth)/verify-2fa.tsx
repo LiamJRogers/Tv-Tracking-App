@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { styles } from "../styles/verify-2fa.styles";
-import { useAuth } from "../hooks/AuthContext";
-import { FormError } from "../components/FormError";
+import { styles } from "../../styles/verify-2fa.styles";
+import { useAuth } from "../../hooks/AuthContext";
+import { FormError } from "../../components/FormError";
 import { useLocalSearchParams } from "expo-router";
-import { use2FA } from "../hooks/use2FA";
+import { use2FA } from "../../hooks/use2FA";
 
 export default function Verify2FAScreen() {
   const router = useRouter();

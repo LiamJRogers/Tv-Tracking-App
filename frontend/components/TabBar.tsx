@@ -25,12 +25,13 @@ export default function TabBar() {
     <View
       style={{
         flexDirection: "row",
-        height: 80,
+        height: 90,
         borderTopWidth: 1,
         borderTopColor: "#F1F5F9",
         backgroundColor: "#fff",
         justifyContent: "space-around",
-        alignItems: "center",
+        alignItems: "flex-start",
+        paddingTop: 10,
       }}
     >
       {tabs.map((tab) => (

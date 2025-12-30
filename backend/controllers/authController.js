@@ -275,3 +275,17 @@ exports.resend2FA = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.getCurrentUser = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "Missing token" });
+  const token = authHeader.split(" ")[1];
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await findUserById(payload.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ id: user.id, username: user.username, email: user.email });
+  } catch (err) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};

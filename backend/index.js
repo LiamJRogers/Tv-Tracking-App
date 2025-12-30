@@ -9,6 +9,7 @@ const { createSeriesTable } = require("./models/seriesModel");
 const { createSeasonsTable } = require("./models/seasonModel");
 const { createEpisodesTable } = require("./models/episodeModel");
 const { createCastTable } = require("./models/castModel");
+const { createWatchlistTable } = require("./models/watchlistModel");
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -19,10 +20,12 @@ app.use(express.json());
 const authRoutes = require("./routes/authRoutes");
 const discoverRoutes = require("./routes/discoverRoutes");
 const seriesRoutes = require("./routes/seriesRoutes");
+const watchlistRoutes = require("./routes/watchlistRoutes");
 
 app.use("/api", authRoutes);
 app.use("/api", discoverRoutes);
 app.use("/api", seriesRoutes);
+app.use("/api", watchlistRoutes);
 
 const startServer = async () => {
   try {
@@ -32,6 +35,7 @@ const startServer = async () => {
     await createSeasonsTable();
     await createEpisodesTable();
     await createCastTable();
+    await createWatchlistTable();
 
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);

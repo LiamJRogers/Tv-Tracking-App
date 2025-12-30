@@ -13,6 +13,14 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   addButtonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  removeButton: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#DC2E2D",
+  },
+  removeButtonText: {
+    color: "#DC2E2D",
+  },
   episodesHeader: {
     flexDirection: "row",
     alignItems: "center",

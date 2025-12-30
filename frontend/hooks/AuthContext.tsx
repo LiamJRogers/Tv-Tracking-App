@@ -32,7 +32,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       const token = await getAccessToken();
-      if (token) setAccessToken(token);
+      if (token) {
+        setAccessToken(token);
+        try {
+          const response = await fetch(`${API_URL}/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+          if (response.ok) {
+            setUser(data);
+          } else {
+            setUser(null);
+          }
+        } catch {
+          setUser(null);
+        }
+      }
       setLoading(false);
     })();
   }, []);

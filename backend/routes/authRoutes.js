@@ -6,6 +6,7 @@ const {
   enable2FA,
   verify2FA,
   resend2FA,
+  getCurrentUser,
 } = require("../controllers/authController");
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.post("/login", login);
 router.post("/enable-2fa", enable2FA);
 router.post("/verify-2fa", verify2FA);
 router.post("/resend-2fa", resend2FA);
+router.get("/me", getCurrentUser);
 
 module.exports = router;

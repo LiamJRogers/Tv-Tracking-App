@@ -6,14 +6,22 @@ import CastList from "./CastList";
 import { styles } from "../../styles/seriesDetail.styles";
 import { useSeasonDropdown } from "../../hooks/useSeasonDropdown";
 import { AddToWatchlistButton } from "./AddToWatchlistButton";
+import { SeriesCompletedButton } from "./SeriesCompletedButton";
 import SeasonDropdown from "./SeasonDropdown";
 import { Series, Season, Episode } from "../../types/series";
+import { useWatchedEpisodes } from "../../hooks/useWatchedEpisodes";
+import SeasonReviewModal from "./SeasonReviewModal";
+import { useAuth } from "../../hooks/AuthContext";
+import { useSeasonReviewModal } from "../../hooks/useSeasonReviewModal";
+import {
+  getFilteredEpisodes,
+  isSeriesCompleted,
+} from "../../utils/seriesHelpers";
 
 type SeriesDetailProps = {
   series: Series;
   seasons: Season[];
   episodes: Episode[];
-  onButtonPress?: () => void;
 };
 
 const SeriesDetail: React.FC<SeriesDetailProps> = ({
@@ -30,18 +38,31 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({
     setItems,
   } = useSeasonDropdown(seasons);
 
+  const { user } = useAuth();
   const selectedSeason = seasons.find((s) => s.id === selectedSeasonId);
+  const filteredEpisodes = getFilteredEpisodes(episodes, selectedSeasonId);
 
-  const filteredEpisodes =
-    selectedSeasonId !== null
-      ? episodes.filter((ep) => ep.seasonId === selectedSeasonId)
-      : episodes;
+  const {
+    watched,
+    loading: watchedLoading,
+    markWatched,
+    unmarkWatched,
+  } = useWatchedEpisodes(series.id);
+
+  const completed = isSeriesCompleted(episodes, watched);
+
+  const { showReviewModal, reviewStatusLoading, handleCloseModal } =
+    useSeasonReviewModal(user?.id, selectedSeason, filteredEpisodes, watched);
 
   return (
     <View style={styles.container}>
       <SeriesDetailHeader series={series} />
       <View style={styles.addButtonWrapper}>
-        <AddToWatchlistButton seriesId={series.id} />
+        {completed ? (
+          <SeriesCompletedButton />
+        ) : (
+          <AddToWatchlistButton seriesId={series.id} />
+        )}
       </View>
       <View style={styles.episodesHeader}>
         <Text style={styles.episodesTitle}>Episodes</Text>
@@ -58,9 +79,23 @@ const SeriesDetail: React.FC<SeriesDetailProps> = ({
         <EpisodesList
           episodes={filteredEpisodes}
           seasons={selectedSeason ? [selectedSeason] : []}
+          seriesId={series.id}
+          watched={watched}
+          loading={watchedLoading}
+          markWatched={markWatched}
+          unmarkWatched={unmarkWatched}
         />
         <CastList cast={series.cast} />
       </View>
+      {user?.id && !reviewStatusLoading && showReviewModal && (
+        <SeasonReviewModal
+          visible
+          onClose={handleCloseModal}
+          season={selectedSeason}
+          seriesId={series.id}
+          userId={user.id}
+        />
+      )}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "../../styles/episodesList.styles";
@@ -7,20 +7,38 @@ import { Episode, Season } from "../../types/series";
 type EpisodesListProps = {
   episodes: Episode[];
   seasons: Season[];
+  seriesId: number;
+  watched: number[];
+  loading: boolean;
+  markWatched: (id: number) => void;
+  unmarkWatched: (id: number) => void;
 };
 
-const EpisodesList: React.FC<EpisodesListProps> = ({ episodes, seasons }) => {
-  const [checkedEpisodes, setCheckedEpisodes] = useState<number[]>([]);
+function formatEpisodeTitle(ep: Episode) {
+  return `${ep.episodeNumber === 0 ? "SP" : `Ep${ep.episodeNumber}`}. ${
+    ep.name
+  }`;
+}
 
-  const toggleCheckbox = (id: number) => {
-    setCheckedEpisodes((prev) =>
-      prev.includes(id) ? prev.filter((epId) => epId !== id) : [...prev, id]
-    );
-  };
+export const EpisodesList: React.FC<EpisodesListProps> = ({
+  episodes,
+  watched,
+  loading,
+  markWatched,
+  unmarkWatched,
+}) => {
+  const handleCheckbox = useCallback(
+    (id: number) => {
+      if (watched.includes(id)) unmarkWatched(id);
+      else markWatched(id);
+    },
+    [watched, markWatched, unmarkWatched]
+  );
 
-  const handlePersonAdd = (id: number) => {
+  const handlePersonAdd = useCallback((id: number) => {
+    // TODO: Implement "watched together" feature
     console.log(`Person add clicked for episode ${id}`);
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -28,9 +46,7 @@ const EpisodesList: React.FC<EpisodesListProps> = ({ episodes, seasons }) => {
         <View key={ep.id}>
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.episodeTitle}>
-                {ep.episodeNumber === 0 ? "SP" : ep.episodeNumber}. {ep.name}
-              </Text>
+              <Text style={styles.episodeTitle}>{formatEpisodeTitle(ep)}</Text>
               {ep.description && (
                 <Text
                   style={styles.episodeDescription}
@@ -42,18 +58,19 @@ const EpisodesList: React.FC<EpisodesListProps> = ({ episodes, seasons }) => {
               )}
             </View>
             <TouchableOpacity
-              onPress={() => toggleCheckbox(ep.id)}
+              onPress={() => handleCheckbox(ep.id)}
               style={styles.iconButton}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              disabled={loading}
             >
               <MaterialIcons
                 name={
-                  checkedEpisodes.includes(ep.id)
+                  watched.includes(ep.id)
                     ? "check-box"
                     : "check-box-outline-blank"
                 }
                 size={24}
-                color={checkedEpisodes.includes(ep.id) ? "#13A4EC" : "#B0B0B0"}
+                color={watched.includes(ep.id) ? "#13A4EC" : "#B0B0B0"}
               />
             </TouchableOpacity>
             <TouchableOpacity

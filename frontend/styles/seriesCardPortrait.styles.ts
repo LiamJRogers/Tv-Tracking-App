@@ -40,4 +40,10 @@ export const styles = StyleSheet.create({
     color: "#444",
     textAlign: "left",
   },
+  lastWatchedText: {
+    color: "#4c809a",
+    fontSize: 14,
+    fontWeight: "normal",
+    marginTop: -5,
+  },
 });

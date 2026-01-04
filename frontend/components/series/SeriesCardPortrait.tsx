@@ -7,6 +7,8 @@ type SeriesCardPortraitProps = {
   posterUrl?: string;
   genres: string[];
   onPress?: () => void;
+  showGenres?: boolean;
+  lastWatched?: { seasonNumber: number; episodeNumber: number } | null;
 };
 
 const SeriesCardPortrait: React.FC<SeriesCardPortraitProps> = ({
@@ -14,6 +16,8 @@ const SeriesCardPortrait: React.FC<SeriesCardPortraitProps> = ({
   posterUrl,
   genres = [],
   onPress,
+  showGenres = true,
+  lastWatched,
 }) => (
   <Pressable onPress={onPress} style={styles.card}>
     <View style={styles.container}>
@@ -27,13 +31,20 @@ const SeriesCardPortrait: React.FC<SeriesCardPortraitProps> = ({
       <Text style={styles.name} numberOfLines={2}>
         {name}
       </Text>
-      <View style={styles.genresContainer}>
-        {genres.map((genre) => (
-          <Text key={genre} style={styles.genre}>
-            {genre}
-          </Text>
-        ))}
-      </View>
+      {lastWatched && (
+        <Text style={styles.lastWatchedText}>
+          S{lastWatched.seasonNumber} Ep{lastWatched.episodeNumber}
+        </Text>
+      )}
+      {showGenres && (
+        <View style={styles.genresContainer}>
+          {genres.map((genre) => (
+            <Text key={genre} style={styles.genre}>
+              {genre}
+            </Text>
+          ))}
+        </View>
+      )}
     </View>
   </Pressable>
 );

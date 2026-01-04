@@ -7,6 +7,7 @@ type TopBarProps = {
   onNotifications?: () => void;
   showBackButton?: boolean;
   onBack?: () => void;
+  showBorder?: boolean;
 };
 
 export default function TopBar({
@@ -14,6 +15,7 @@ export default function TopBar({
   onNotifications,
   showBackButton = false,
   onBack,
+  showBorder = true,
 }: TopBarProps) {
   return (
     <View
@@ -25,8 +27,8 @@ export default function TopBar({
         paddingTop: 70,
         paddingBottom: 16,
         backgroundColor: "#fff",
-        borderBottomWidth: 1,
-        borderBottomColor: "#F1F5F9",
+        borderBottomWidth: showBorder ? 1 : 0,
+        borderBottomColor: "#E5E7EB",
       }}
     >
       {showBackButton ? (

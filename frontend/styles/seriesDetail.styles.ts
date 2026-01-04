@@ -48,4 +48,14 @@ export const styles = StyleSheet.create({
   dropDownLabel: { fontSize: 15, lineHeight: 20 },
   dropDownListItem: { minHeight: 40, height: 40 },
   episodesListWrapper: { flex: 1 },
+  completedButton: {
+    backgroundColor: "#E9EDF4",
+    borderWidth: 1,
+    borderColor: "#13A4EC",
+  },
+  completedButtonText: {
+    color: "#13A4EC",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });

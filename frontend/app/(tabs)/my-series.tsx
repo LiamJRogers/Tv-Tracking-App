@@ -25,11 +25,7 @@ export default function MySeriesScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <TopBar
-        onSearch={() => {}}
-        onNotifications={() => {}}
-        showBorder={false}
-      />
+      <TopBar onNotifications={() => {}} showBorder={false} />
       <MySeriesTabBar
         labels={TAB_LABELS}
         activeTab={activeTab}

@@ -25,12 +25,7 @@ export function WatchlistTab({
   if (data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <MaterialIcons
-          name="bookmark-border"
-          size={82}
-          color="#CBD5E1"
-          style={styles.emptyIcon}
-        />
+        <MaterialIcons name="bookmark-border" size={82} color="#CBD5E1" />
         <Text style={styles.emptyTitle}>Your watchlist is empty</Text>
         <Text style={styles.emptyText}>
           Discover new series to add to your watchlist to keep track of what you

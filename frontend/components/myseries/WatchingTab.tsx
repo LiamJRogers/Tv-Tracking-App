@@ -25,12 +25,7 @@ export function WatchingTab({
   if (data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <MaterialIcons
-          name="local-movies"
-          size={82}
-          color="#CBD5E1"
-          style={styles.emptyIcon}
-        />
+        <MaterialIcons name="local-movies" size={82} color="#CBD5E1" />
         <Text style={styles.emptyTitle}>Nothing being watched</Text>
         <Text style={styles.emptyText}>
           Start watching a series to see it here and keep track of your

@@ -5,7 +5,7 @@ import TabBar from "../../components/TabBar";
 export default function TabLayout() {
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false, animation: "none" }} />
       <TabBar />
     </>
   );

@@ -23,12 +23,7 @@ export function CompletedTab({
   if (data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <MaterialIcons
-          name="checklist-rtl"
-          size={82}
-          color="#CBD5E1"
-          style={styles.emptyIcon}
-        />
+        <MaterialIcons name="checklist-rtl" size={82} color="#CBD5E1" />
         <Text style={styles.emptyTitle}>No completed series</Text>
         <Text style={styles.emptyText}>
           Once you finish a series, it will appear here so you can look back on

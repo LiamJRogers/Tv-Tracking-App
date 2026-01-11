@@ -20,7 +20,7 @@ export default function DiscoverScreen() {
 
   return (
     <View style={styles.container}>
-      <TopBar onSearch={() => {}} onNotifications={() => {}} />
+      <TopBar onNotifications={() => {}} />
       <FlatList
         data={filteredTopRated}
         keyExtractor={(item) => item.id.toString()}

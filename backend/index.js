@@ -26,6 +26,7 @@ const watchedEpisodesRoutes = require("./routes/watchedEpisodesRoutes");
 const userSeriesRoutes = require("./routes/userSeriesRoutes");
 const { createSeasonReviewsTable } = require("./models/seasonReviewModel");
 const seasonReviewRoutes = require("./routes/seasonReviewRoutes");
+const searchRoutes = require("./routes/searchRoutes");
 
 app.use("/api", authRoutes);
 app.use("/api", discoverRoutes);
@@ -34,6 +35,7 @@ app.use("/api", watchlistRoutes);
 app.use("/api", watchedEpisodesRoutes);
 app.use("/api", userSeriesRoutes);
 app.use("/api", seasonReviewRoutes);
+app.use("/api", searchRoutes);
 
 const startServer = async () => {
   try {

@@ -1,22 +1,22 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 type TopBarProps = {
-  onSearch?: () => void;
   onNotifications?: () => void;
   showBackButton?: boolean;
-  onBack?: () => void;
   showBorder?: boolean;
+  showSearch?: boolean;
 };
 
 export default function TopBar({
-  onSearch,
   onNotifications,
   showBackButton = false,
-  onBack,
   showBorder = true,
+  showSearch = true,
 }: TopBarProps) {
+  const router = useRouter();
   return (
     <View
       style={{
@@ -32,7 +32,7 @@ export default function TopBar({
       }}
     >
       {showBackButton ? (
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => router.back()}>
           <MaterialIcons name="arrow-back" size={28} color="#000" />
         </TouchableOpacity>
       ) : (
@@ -41,8 +41,11 @@ export default function TopBar({
         </Text>
       )}
       <View style={{ flexDirection: "row" }}>
-        {onSearch && (
-          <TouchableOpacity onPress={onSearch} style={{ marginRight: 20 }}>
+        {showSearch && (
+          <TouchableOpacity
+            onPress={() => router.push("/search")}
+            style={{ marginRight: 20 }}
+          >
             <MaterialIcons name="search" size={28} color={"#64748B"} />
           </TouchableOpacity>
         )}

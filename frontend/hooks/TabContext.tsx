@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-type Tab = "home" | "my-series" | "activity" | "discover" | "profile";
+export type Tab = "home" | "my-series" | "activity" | "discover" | "profile";
 
 const TabContext = createContext<{
   lastTab: Tab;

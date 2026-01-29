@@ -8,12 +8,10 @@ router.get("/users/search", async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT u.id, u.username, u.name, u.profile_pic_url,
-              -- outgoing pending (I requested them)
               EXISTS(
                 SELECT 1 FROM friends f
                 WHERE f.user_id = $2 AND f.friend_id = u.id AND f.status = 'pending'
               ) AS requested,
-              -- incoming pending (they requested me)
               EXISTS(
                 SELECT 1 FROM friends f
                 WHERE f.user_id = u.id AND f.friend_id = $2 AND f.status = 'pending'
@@ -50,17 +48,13 @@ router.get("/friends/suggestions", async (req, res) => {
       `SELECT u.id, u.username, u.name, u.profile_pic_url
        FROM users u
        WHERE u.id != $1
-         -- exclude users this user has blocked
          AND u.id NOT IN (SELECT blocked_user_id FROM blocked_users WHERE user_id = $1)
-         -- exclude users who have blocked this user
          AND u.id NOT IN (SELECT user_id FROM blocked_users WHERE blocked_user_id = $1)
-         -- exclude accepted friends (either direction)
          AND u.id NOT IN (
            SELECT friend_id FROM friends WHERE user_id = $1 AND status = 'accepted'
            UNION
            SELECT user_id FROM friends WHERE friend_id = $1 AND status = 'accepted'
          )
-         -- exclude any pending relationship (incoming or outgoing)
          AND u.id NOT IN (
            SELECT friend_id FROM friends WHERE user_id = $1 AND status = 'pending'
            UNION
@@ -176,7 +170,6 @@ router.post("/friends/accept", async (req, res) => {
        WHERE user_id = $2 AND friend_id = $1 AND status = 'pending'`,
       [userId, friendId],
     );
-    // Also create reciprocal record
     await pool.query(
       `INSERT INTO friends (user_id, friend_id, status, responded_at)
        VALUES ($1, $2, 'accepted', CURRENT_TIMESTAMP)

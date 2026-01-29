@@ -37,7 +37,12 @@ export default function SearchScreen() {
 
   return (
     <View style={styles.container}>
-      <TopBar showBackButton showBorder={false} showSearch={false} />
+      <TopBar
+        showBackButton
+        showBorder={false}
+        showSearch={false}
+        showFriends={false}
+      />
       <View style={styles.searchBarWrapper}>
         <MaterialIcons
           name="search"

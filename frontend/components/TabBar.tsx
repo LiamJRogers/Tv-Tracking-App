@@ -1,15 +1,36 @@
 import React from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter, useSegments } from "expo-router";
 import { useTab, Tab } from "../hooks/TabContext";
 
-const tabs: Array<{ name: Tab; label: string; icon: string }> = [
-  { name: "home", label: "Home", icon: "home" },
-  { name: "my-series", label: "My Series", icon: "live-tv" },
-  { name: "activity", label: "Activity", icon: "people" },
-  { name: "discover", label: "Discover", icon: "explore" },
-  { name: "profile", label: "Profile", icon: "person" },
+const tabs: Array<{
+  name: Tab;
+  label: string;
+  icon: string;
+  iconType?: "material" | "community";
+}> = [
+  { name: "home", label: "Home", icon: "home", iconType: "material" },
+  {
+    name: "my-series",
+    label: "My Series",
+    icon: "movie-open",
+    iconType: "community",
+  },
+  {
+    name: "activity",
+    label: "Activity",
+    icon: "account-group",
+    iconType: "community",
+  },
+  {
+    name: "discover",
+    label: "Discover",
+    icon: "explore",
+    iconType: "material",
+  },
+  { name: "profile", label: "Profile", icon: "person", iconType: "material" },
 ];
 
 export default function TabBar() {
@@ -44,11 +65,19 @@ export default function TabBar() {
           }}
           style={{ alignItems: "center", flex: 1 }}
         >
-          <MaterialIcons
-            name={tab.icon as any}
-            size={28}
-            color={currentTab === tab.name ? "#13A4EC" : "#64748B"}
-          />
+          {tab.iconType === "community" ? (
+            <MaterialCommunityIcons
+              name={tab.icon as any}
+              size={28}
+              color={currentTab === tab.name ? "#13A4EC" : "#64748B"}
+            />
+          ) : (
+            <MaterialIcons
+              name={tab.icon as any}
+              size={28}
+              color={currentTab === tab.name ? "#13A4EC" : "#64748B"}
+            />
+          )}
           <Text
             style={{
               color: currentTab === tab.name ? "#13A4EC" : "#64748B",

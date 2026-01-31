@@ -166,14 +166,18 @@ router.post("/friends/accept", async (req, res) => {
     return res.status(400).json({ error: "Missing fields" });
   try {
     await pool.query(
-      `UPDATE friends SET status = 'accepted', responded_at = CURRENT_TIMESTAMP
+      `UPDATE friends SET status = 'accepted', responded_at = CURRENT_TIMESTAMP, friends_since = COALESCE(friends_since, CURRENT_TIMESTAMP)
        WHERE user_id = $2 AND friend_id = $1 AND status = 'pending'`,
       [userId, friendId],
     );
     await pool.query(
-      `INSERT INTO friends (user_id, friend_id, status, responded_at)
-       VALUES ($1, $2, 'accepted', CURRENT_TIMESTAMP)
-       ON CONFLICT (user_id, friend_id) DO UPDATE SET status = 'accepted', responded_at = CURRENT_TIMESTAMP`,
+      `INSERT INTO friends (user_id, friend_id, status, responded_at, friends_since)
+       VALUES ($1, $2, 'accepted', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       ON CONFLICT (user_id, friend_id)
+       DO UPDATE SET
+         status = 'accepted',
+         responded_at = CURRENT_TIMESTAMP,
+         friends_since = COALESCE(friends.friends_since, CURRENT_TIMESTAMP)`,
       [userId, friendId],
     );
     res.json({ success: true });
@@ -205,16 +209,19 @@ router.get("/friends/list", async (req, res) => {
   try {
     const result = await pool.query(
       `
-      SELECT u.id, u.username, u.name, u.profile_pic_url
-      FROM friends f
-      JOIN users u ON u.id = f.friend_id
-      WHERE f.user_id = $1 AND f.status = 'accepted'
-      UNION
-      SELECT u2.id, u2.username, u2.name, u2.profile_pic_url
-      FROM friends f2
-      JOIN users u2 ON u2.id = f2.user_id
-      WHERE f2.friend_id = $1 AND f2.status = 'accepted'
-      ORDER BY name ASC
+      SELECT DISTINCT ON (id) *
+      FROM (
+        SELECT u.id, u.username, u.name, u.profile_pic_url, f.friends_since
+        FROM friends f
+        JOIN users u ON u.id = f.friend_id
+        WHERE f.user_id = $1 AND f.status = 'accepted'
+        UNION ALL
+        SELECT u2.id, u2.username, u2.name, u2.profile_pic_url, f2.friends_since
+        FROM friends f2
+        JOIN users u2 ON u2.id = f2.user_id
+        WHERE f2.friend_id = $1 AND f2.status = 'accepted'
+      ) AS all_friends
+      ORDER BY id, name ASC
       `,
       [userId],
     );
@@ -223,6 +230,48 @@ router.get("/friends/list", async (req, res) => {
   } catch (err) {
     console.error("Failed to fetch friends list:", err);
     res.status(500).json({ error: "Failed to fetch friends list" });
+  }
+});
+
+router.post("/friends/remove", async (req, res) => {
+  const { userId, friendId } = req.body;
+  if (!userId || !friendId)
+    return res.status(400).json({ error: "Missing fields" });
+  try {
+    await pool.query(
+      `DELETE FROM friends
+       WHERE (user_id = $1 AND friend_id = $2)
+          OR (user_id = $2 AND friend_id = $1)`,
+      [userId, friendId],
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to remove friend:", err);
+    res.status(500).json({ error: "Failed to remove friend" });
+  }
+});
+
+router.post("/friends/block", async (req, res) => {
+  const { userId, friendId } = req.body;
+  if (!userId || !friendId)
+    return res.status(400).json({ error: "Missing fields" });
+  try {
+    await pool.query(
+      `DELETE FROM friends
+       WHERE (user_id = $1 AND friend_id = $2)
+          OR (user_id = $2 AND friend_id = $1)`,
+      [userId, friendId],
+    );
+    await pool.query(
+      `INSERT INTO blocked_users (user_id, blocked_user_id)
+       VALUES ($1, $2)
+       ON CONFLICT (user_id, blocked_user_id) DO NOTHING`,
+      [userId, friendId],
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to block user:", err);
+    res.status(500).json({ error: "Failed to block user" });
   }
 });
 

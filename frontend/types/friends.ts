@@ -3,6 +3,7 @@ export type FriendUser = {
   username: string;
   name: string;
   profile_pic_url?: string;
+  friends_since?: string;
 };
 
 export type PendingUser = {

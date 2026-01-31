@@ -27,7 +27,7 @@ export function useFriendActions() {
         setLoading(false);
       }
     },
-    [user?.id]
+    [user?.id],
   );
 
   const cancelFriendRequest = useCallback(
@@ -51,8 +51,62 @@ export function useFriendActions() {
         setLoading(false);
       }
     },
-    [user?.id]
+    [user?.id],
   );
 
-  return { sendFriendRequest, cancelFriendRequest, loading };
+  const removeFriend = useCallback(
+    async (friendId: string) => {
+      if (!user?.id) {
+        console.warn("removeFriend: user not authenticated");
+        return false;
+      }
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/friends/remove`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, friendId }),
+        });
+        return res.ok;
+      } catch (err) {
+        console.error("removeFriend error:", err);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user?.id],
+  );
+
+  const blockFriend = useCallback(
+    async (friendId: string) => {
+      if (!user?.id) {
+        console.warn("blockFriend: user not authenticated");
+        return false;
+      }
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/friends/block`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, friendId }),
+        });
+        return res.ok;
+      } catch (err) {
+        console.error("blockFriend error:", err);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user?.id],
+  );
+
+  return {
+    sendFriendRequest,
+    cancelFriendRequest,
+    removeFriend,
+    blockFriend,
+    loading,
+  };
 }

@@ -80,7 +80,7 @@ export default function FriendsScreen() {
                 fetchPending={fetchPending}
                 refreshFriends={refreshFriends}
               />
-              <FriendsList friends={friends} />
+              <FriendsList friends={friends} refreshFriends={refreshFriends} />
             </>
           )}
         </ScrollView>
